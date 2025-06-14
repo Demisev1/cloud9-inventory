@@ -3,15 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud 9 Vapes Inventory Manager – v1.8.0</title>
+  <title>Cloud 9 Vapes Inventory Manager – v1.9.0</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0099ff" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
 </head>
 <body>
 
   <h1>Cloud 9 Vapes Inventory Manager</h1>
+
+  <!-- Theme Selector -->
+  <label for="themeSelect">🎨 Theme:</label>
+  <select id="themeSelect" onchange="changeTheme()">
+    <option value="default">Light (Default)</option>
+    <option value="cloud9">Cloud 9</option>
+    <option value="dark">Dark Mode</option>
+  </select>
 
   <!-- Drag & Drop Zone -->
   <div id="dropZone">📤 Drop your CSV file here</div>
@@ -19,9 +25,9 @@
   <!-- Controls -->
   <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" />
   <label for="multiplierInput">Reorder Multiplier:</label>
-  <input type="number" id="multiplierInput" min="0.5" step="0.1" value="1.0" onchange="saveSettings()" />
+  <input type="number" id="multiplierInput" min="0.5" step="0.1" onchange="saveSettings()" />
   <label for="bufferInput">Safety Buffer (%):</label>
-  <input type="number" id="bufferInput" min="0" max="100" step="5" value="20" onchange="saveSettings()" />
+  <input type="number" id="bufferInput" min="0" max="100" onchange="saveSettings()" />
   <button onclick="processCSV()">Analyze</button>
   <button onclick="downloadCSV()" id="downloadBtn" style="display:none;">Download Reorder List</button>
 
@@ -40,21 +46,12 @@
   <!-- Results -->
   <div id="results"></div>
 
-  <!-- Footer & Theme Toggle -->
+  <!-- Footer -->
   <footer>
-    <div>
-      <button onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
-    </div>
-    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.8.0</strong></p>
+    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.9.0</strong></p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <script src="script.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .catch(() => console.log('Service Worker failed ❌'));
-    }
-  </script>
 </body>
 </html>

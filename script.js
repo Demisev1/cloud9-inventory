@@ -1,10 +1,17 @@
-let reorderList = [];
-let negativeStockList = [];
+let historyList = [];
+let lastResults = [];
 const MAX_HISTORY = 5;
 
-function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', isDark);
+function changeTheme() {
+  const val = document.getElementById('themeSelect').value;
+  document.body.className = `theme-${val}`;
+  localStorage.setItem('theme', val);
+}
+
+function initThemes() {
+  const stored = localStorage.getItem('theme') || 'default';
+  document.getElementById('themeSelect').value = stored;
+  document.body.className = `theme-${stored}`;
 }
 
 function saveSettings() {
@@ -13,130 +20,83 @@ function saveSettings() {
 }
 
 function loadHistory() {
-  const history = JSON.parse(localStorage.getItem('uploadHistory')) || [];
+  historyList = JSON.parse(localStorage.getItem('uploadHistory')) || [];
   const ul = document.getElementById('uploadHistory');
   ul.innerHTML = '';
-  history.forEach((entry, idx) => {
+  historyList.forEach((h, idx) => {
     const li = document.createElement('li');
     li.innerHTML = `
-      <span>${entry.name} – ${new Date(entry.time).toLocaleString()}</span>
+      <span>${h.name} – ${new Date(h.time).toLocaleString()}</span>
       <div>
-        <button class="upload-item-btn" onclick="reAnalyze(${idx})">Re-run</button>
-        <button class="upload-item-btn delete" onclick="deleteHistoryItem(${idx})">Delete</button>
-      </div>
-    `;
+        <button onclick="processText(historyList[${idx}].content)">Re-run</button>
+        <button class="delete" onclick="deleteHist(${idx})">Delete</button>
+      </div>`;
     ul.appendChild(li);
   });
 }
 
+function deleteHist(i) {
+  historyList.splice(i,1);
+  localStorage.setItem('uploadHistory', JSON.stringify(historyList));
+  loadHistory();
+}
+
 function addToHistory(name, content) {
-  const history = JSON.parse(localStorage.getItem('uploadHistory')) || [];
-  history.unshift({ name, time: Date.now(), content });
-  if (history.length > MAX_HISTORY) history.pop();
-  localStorage.setItem('uploadHistory', JSON.stringify(history));
+  historyList.unshift({ name, time:Date.now(), content });
+  if (historyList.length > MAX_HISTORY) historyList.pop();
+  localStorage.setItem('uploadHistory', JSON.stringify(historyList));
   loadHistory();
-}
-
-function deleteHistoryItem(idx) {
-  const history = JSON.parse(localStorage.getItem('uploadHistory')) || [];
-  history.splice(idx, 1);
-  localStorage.setItem('uploadHistory', JSON.stringify(history));
-  loadHistory();
-}
-
-function reAnalyze(idx) {
-  const history = JSON.parse(localStorage.getItem('uploadHistory')) || [];
-  processCSVFromText(history[idx].content);
 }
 
 function handleFileUpload() {
-  const file = document.getElementById('csvFile').files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    addToHistory(file.name, e.target.result);
-    processCSVFromText(e.target.result);
-  };
-  reader.readAsText(file);
+  const f = document.getElementById('csvFile').files[0];
+  if (!f) return;
+  const fr = new FileReader();
+  fr.onload = e => addAndProcess(f.name, e.target.result);
+  fr.readAsText(f);
+}
+
+function addAndProcess(name, text) {
+  addToHistory(name, text);
+  processText(text);
 }
 
 function processCSV() {
-  const file = document.getElementById('csvFile').files[0];
-  if (!file) return alert('Please select a CSV file.');
-  const reader = new FileReader();
-  reader.onload = e => processCSVFromText(e.target.result);
-  reader.readAsText(file);
+  const f = document.getElementById('csvFile').files[0];
+  if (!f) return alert('Select a CSV!');
+  const fr = new FileReader();
+  fr.onload = e => processText(e.target.result);
+  fr.readAsText(f);
 }
 
-function processCSVFromText(csvText) {
-  const mult = parseFloat(document.getElementById("multiplierInput").value) || 1.0;
-  const buf = parseFloat(document.getElementById("bufferInput").value) || 0;
-
+function processText(csvText) {
+  const m = parseFloat(document.getElementById("multiplierInput").value) || 1;
+  const b = parseFloat(document.getElementById("bufferInput").value) || 0;
   Papa.parse(csvText, {
     header: true,
     skipEmptyLines: true,
-    complete: results => {
-      reorderList = [];
-      negativeStockList = [];
-      results.data.forEach(r => {
-        const sold = parseInt(r['Last Sales/7 Days'] || 0);
-        const stock = parseInt(r['Qty'] || 0);
-        const buffer = Math.ceil(sold * mult * (buf / 100));
-        const raw = sold * mult + buffer - stock;
-        const qty = raw > 0 ? Math.ceil(raw) : 0;
-        const item = {
-          item_name: r['Product name'],
-          category: r['Category'] || 'Uncategorized',
-          items_sold: sold,
-          items_in_stock: stock,
-          restock_quantity: qty
-        };
-        if (qty) reorderList.push(item);
-        if (stock < 0) negativeStockList.push(item);
+    complete: r => {
+      const results = [];
+      const neg = [];
+      r.data.forEach(row => {
+        const sold = parseInt(row['Last Sales/7 Days']) || 0;
+        const stock = parseInt(row['Qty']) || 0;
+        const buffer = Math.ceil(sold * m * (b / 100));
+        const qty = Math.max(0, Math.ceil(sold * m + buffer - stock));
+        if (qty) results.push({ ...row, restock_quantity: qty });
+        if (stock < 0) neg.push(row);
       });
-      reorderList.sort((a,b) =>
-        a.category.localeCompare(b.category) || b.restock_quantity - a.restock_quantity
-      );
-      populateCategoryFilter(reorderList);
-      displayResults(reorderList, negativeStockList);
-      document.getElementById('downloadBtn').style.display =
-        reorderList.length ? 'inline-block' : 'none';
+      lastResults = results;
+      populateCategoryFilter(results);
+      display(results, neg);
     }
   });
 }
 
-function displayResults(re, neg) {
-  let html = '';
-  if (re.length) {
-    html += `<h2>📋 Restock Needed</h2><table><tr><th>Category</th><th>Item</th><th>Sold</th><th>In Stock</th><th>Restock</th></tr>`;
-    re.forEach(i => html += `<tr><td>${i.category}</td><td>${i.item_name}</td><td>${i.items_sold}</td><td>${i.items_in_stock}</td><td>${i.restock_quantity}</td></tr>`);
-    html += `</table>`;
-  } else {
-    html += `<p>✅ All stock levels are sufficient!</p>`;
-  }
-  if (neg.length) {
-    html += `<h2 style="color:red;">⚠️ Negative Stock Items</h2><table><tr><th>Category</th><th>Item</th><th>In Stock</th><th>Sold</th></tr>`;
-    neg.forEach(i => html += `<tr><td>${i.category}</td><td>${i.item_name}</td><td style="color:red;">${i.items_in_stock}</td><td>${i.items_sold}</td></tr>`);
-    html += `</table>`;
-  }
-  document.getElementById('results').innerHTML = html;
-}
-
-function downloadCSV() {
-  if (!reorderList.length) return;
-  const blob = new Blob([Papa.unparse(reorderList)], { type: 'text/csv' });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "reorder_list.csv";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-function populateCategoryFilter(data) {
+function populateCategoryFilter(results) {
   const sel = document.getElementById('categoryFilter');
-  sel.innerHTML = `<option value="">🔽 Filter by Category</option>`;
-  new Set(data.map(i => i.category)).forEach(cat => {
+  sel.innerHTML = '<option value="">🔽 Filter by Category</option>';
+  new Set(results.map(r => r.Category)).forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat;
     opt.textContent = cat;
@@ -144,51 +104,70 @@ function populateCategoryFilter(data) {
   });
 }
 
+function display(results, neg) {
+  let html = '';
+  if (results.length) {
+    html += '<h2>📋 Restock Needed</h2><table><tr><th>Category</th><th>Item</th><th>Sold</th><th>In Stock</th><th>Restock Qty</th></tr>';
+    results.forEach(r => {
+      html += `<tr><td>${r.Category}</td><td>${r['Product name']}</td><td>${r['Last Sales/7 Days']}</td><td>${r.Qty}</td><td>${r.restock_quantity}</td></tr>`;
+    });
+    html += '</table>';
+  } else {
+    html += '<p>✅ All stock levels are sufficient!</p>';
+  }
+
+  if (neg.length) {
+    html += '<h2 style="color:red;">⚠️ Negative Stock Items</h2><table><tr><th>Category</th><th>Item</th><th>In Stock</th><th>Sold</th></tr>';
+    neg.forEach(n => {
+      html += `<tr><td>${n.Category}</td><td>${n['Product name']}</td><td style="color:red;">${n.Qty}</td><td>${n['Last Sales/7 Days']}</td></tr>`;
+    });
+    html += '</table>';
+  }
+
+  document.getElementById('results').innerHTML = html;
+}
+
 function filterResults() {
-  const txt = document.getElementById("searchInput").value.toLowerCase();
-  const cat = document.getElementById("categoryFilter").value.toLowerCase();
-  document.querySelectorAll("#results table").forEach(t => {
-    t.querySelectorAll("tr").forEach((tr,i) => {
-      if (!i) return;
-      const tx = tr.textContent.toLowerCase();
-      tr.style.display = tx.includes(txt) && (cat === "" || tx.includes(cat)) ? "" : "none";
+  const text = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cat = document.getElementById('categoryFilter').value.toLowerCase();
+  document.querySelectorAll('#results table').forEach(table => {
+    table.querySelectorAll('tr').forEach((row, i) => {
+      if (i === 0) return;
+      const content = row.textContent.toLowerCase();
+      row.style.display = (content.includes(text) && (cat === '' || content.includes(cat))) ? '' : 'none';
     });
   });
 }
 
-// Drag & Drop Setup
-const dropZone = document.getElementById('dropZone');
-['dragenter','dragover'].forEach(evt =>
-  dropZone.addEventListener(evt, e => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-  })
-);
-['dragleave','drop'].forEach(evt =>
-  dropZone.addEventListener(evt, e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-  })
-);
-dropZone.addEventListener('drop', e => {
-  const file = e.dataTransfer.files[0];
-  if (file && file.name.endsWith('.csv')) {
-    const reader = new FileReader();
-    reader.onload = evt => {
-      addToHistory(file.name, evt.target.result);
-      processCSVFromText(evt.target.result);
-    };
-    reader.readAsText(file);
+function downloadCSV() {
+  if (!lastResults.length) return;
+  const blob = new Blob([Papa.unparse(lastResults)], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'reorder_list.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+// Setup drag & drop
+const dz = document.getElementById('dropZone');
+['dragenter', 'dragover'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('dragover'); }));
+dz.addEventListener('drop', e => {
+  const f = e.dataTransfer.files[0];
+  if (f && f.name.endsWith('.csv')) {
+    const fr = new FileReader();
+    fr.onload = ev => addAndProcess(f.name, ev.target.result);
+    fr.readAsText(f);
   } else {
-    alert("Only CSV files are supported!");
+    alert('Only CSV files are supported.');
   }
 });
 
-function init() {
-  if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+window.addEventListener('DOMContentLoaded', () => {
+  initThemes();
+  loadHistory();
   document.getElementById("multiplierInput").value = localStorage.getItem('reorderMultiplier') || 1.0;
   document.getElementById("bufferInput").value = localStorage.getItem('bufferPercent') || 20;
-  loadHistory();
-}
-
-window.addEventListener('DOMContentLoaded', init);
+});
