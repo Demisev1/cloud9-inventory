@@ -8,7 +8,6 @@
   --gap: 16px;
 }
 
-/* Base layout */
 body {
   margin: 0;
   padding: var(--gap);
@@ -18,16 +17,17 @@ body {
   display: flex;
   justify-content: center;
 }
+
 .container {
   width: 100%;
   max-width: 900px;
 }
+
 h1 {
   text-align: center;
   margin-bottom: var(--gap);
 }
 
-/* Card section style */
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -36,35 +36,42 @@ h1 {
   box-shadow: 0 2px 6px var(--shadow);
 }
 
-/* Controls layout */
 .controls {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--gap);
   align-items: center;
 }
 
-/* Form controls */
-input, select, button {
-  width: 100%;
-  padding: 10px;
+.input-group {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+}
+
+input, button, select {
+  padding: 8px;
   border-radius: var(--radius);
   border: 1px solid #ccc;
   box-shadow: 0 2px 6px var(--shadow);
-  margin-top: 6px;
+  font-size: 1em;
 }
+
 button {
   background: var(--main);
   color: white;
-  border: none;
   cursor: pointer;
-  font-size: 1em;
+  border: none;
 }
+
 button:hover {
   opacity: 0.9;
 }
 
-/* Drop zone style */
+#themeToggle {
+  margin-right: auto;
+}
+
 #dropZone {
   padding: 40px;
   border: 2px dashed var(--main);
@@ -74,16 +81,17 @@ button:hover {
   cursor: pointer;
   transition: background 0.2s;
 }
+
 #dropZone.dragover {
   background: #e0f7ff;
 }
 
-/* History list */
 #uploadHistory {
   list-style: none;
   padding: 0;
-  margin: var(--gap) 0 0 0;
+  margin-top: var(--gap);
 }
+
 #uploadHistory li {
   display: flex;
   justify-content: space-between;
@@ -91,61 +99,84 @@ button:hover {
   padding: 8px 0;
   border-bottom: 1px solid #eee;
 }
-.upload-item-btn {
-  margin-left: 8px;
-  font-size: 0.9em;
-}
 
-/* Table styles */
 table {
   width: 100%;
   border-collapse: collapse;
 }
+
 th, td {
   padding: 12px;
   border-bottom: 1px solid #eee;
 }
+
 th {
   background: var(--main);
   color: white;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
 }
+
+th.sort-asc::after {
+  content: '⬆️';
+  position: absolute;
+  right: 8px;
+}
+
+th.sort-desc::after {
+  content: '⬇️';
+  position: absolute;
+  right: 8px;
+}
+
 tr:nth-child(even) {
   background: #f4f4f4;
 }
+
 tr:hover {
   background: #e9f9ff;
 }
 
-/* Footer */
 footer {
   text-align: center;
   margin-top: var(--gap);
   color: #777;
 }
 
-/* Dark theme */
+/* Dark mode */
 body.theme-dark {
   background: #1f1f1f;
   color: #f5f5f5;
 }
+
 body.theme-dark .card {
   background: #2a2a2a;
 }
-body.theme-dark input, body.theme-dark select, body.theme-dark button {
+
+body.theme-dark input,
+body.theme-dark button,
+body.theme-dark select {
   background: #333;
   color: #f5f5f5;
   border: 1px solid #555;
 }
+
 body.theme-dark th {
   background: #444;
 }
+
 body.theme-dark tr:nth-child(even) {
   background: #3a3a3a;
 }
 
-/* Mobile adjustments */
+body.theme-dark tr:hover {
+  background: #444;
+}
+
 @media (max-width: 600px) {
   .controls {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
   }
 }

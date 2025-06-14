@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud 9 Vapes Inventory Manager – v1.9.2</title>
+  <title>Cloud 9 Vapes Inventory Manager – v1.9.7</title>
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#0099ff" />
 </head>
@@ -11,51 +11,34 @@
   <div class="container">
     <h1>Cloud 9 Vapes Inventory Manager</h1>
 
-    <!-- Theme Selector + Toggle -->
     <div class="card controls">
-      <div>
-        <label>🎨 Theme</label>
-        <select id="themeSelect" onchange="changeTheme()">
-          <option value="default">Light</option>
-          <option value="cloud9">Cloud 9</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
-      <button onclick="toggleTheme()">🌓 Toggle</button>
+      <button id="themeToggle" onclick="toggleTheme()">🌓 Switch Theme</button>
+      <input type="text" id="searchInput" placeholder="Search..." oninput="filterResults()" />
+      <select id="categoryFilter" onchange="filterResults()">
+        <option value="">Filter by Category</option>
+      </select>
     </div>
 
-    <!-- CSV Upload -->
-    <div class="card">
-      <div id="dropZone">📤 Drop your CSV here or click to upload</div>
+    <div class="card" id="uploadCard">
+      <div id="dropZone">📤 Drop CSV here or click to choose</div>
       <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" hidden />
     </div>
 
-    <!-- Reorder Settings -->
     <div class="card controls">
-      <div>
+      <div class="input-group">
         <label>Reorder Multiplier</label>
         <input type="number" id="multiplierInput" min="0.5" step="0.1" onchange="saveSettings()" />
       </div>
-      <div>
+      <div class="input-group">
         <label>Safety Buffer (%)</label>
         <input type="number" id="bufferInput" min="0" max="100" onchange="saveSettings()" />
       </div>
       <button onclick="processCSV()">Analyze 🔍</button>
     </div>
 
-    <!-- Filters & History -->
-    <div class="card">
-      <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterResults()" />
-      <select id="categoryFilter" onchange="filterResults()">
-        <option value="">Filter by Category</option>
-      </select>
-      <ul id="uploadHistory"></ul>
-    </div>
-
-    <!-- Results -->
     <div id="results" class="card"></div>
 
-    <footer>Made with 💨 by Shane Warren – <strong>v1.9.2</strong></footer>
+    <footer>Made with 💨 by Shane Warren – <strong>v1.9.7</strong></footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
