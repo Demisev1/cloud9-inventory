@@ -1,44 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud 9 Vapes Inventory Manager – v1.9.7</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloud 9 Vapes Inventory Manager – v1.10.3</title>
   <link rel="stylesheet" href="style.css">
-  <meta name="theme-color" content="#0099ff" />
 </head>
 <body>
   <div class="container">
     <h1>Cloud 9 Vapes Inventory Manager</h1>
 
     <div class="card controls">
-      <button id="themeToggle" onclick="toggleTheme()">🌓 Switch Theme</button>
-      <input type="text" id="searchInput" placeholder="Search..." oninput="filterResults()" />
-      <select id="categoryFilter" onchange="filterResults()">
+      <button id="themeToggle">🌓 Switch Theme</button>
+      <input type="text" id="searchInput" placeholder="Search..." autofocus>
+      <select id="categoryFilter">
         <option value="">Filter by Category</option>
       </select>
     </div>
 
-    <div class="card" id="uploadCard">
-      <div id="dropZone">📤 Drop CSV here or click to choose</div>
-      <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" hidden />
+    <div class="card">
+      <div id="dropZone">📤 Drag & Drop CSV here<br>or Click to Choose File</div>
+      <input type="file" id="csvFile" accept=".csv">
     </div>
 
     <div class="card controls">
       <div class="input-group">
+        <label>Sales Period</label>
+        <select id="periodSelect">
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="60">Last 60 Days</option>
+          <option value="90">Last 90 Days</option>
+        </select>
+      </div>
+      <div class="input-group">
         <label>Reorder Multiplier</label>
-        <input type="number" id="multiplierInput" min="0.5" step="0.1" onchange="saveSettings()" />
+        <input type="number" id="multiplierInput" min="0.5" step="0.1">
       </div>
       <div class="input-group">
         <label>Safety Buffer (%)</label>
-        <input type="number" id="bufferInput" min="0" max="100" onchange="saveSettings()" />
+        <input type="number" id="bufferInput" min="0" max="100">
       </div>
-      <button onclick="processCSV()">Analyze 🔍</button>
+      <button id="analyzeButton">Analyze 🔍</button>
     </div>
 
+    <ul id="uploadHistory" class="card"></ul>
     <div id="results" class="card"></div>
 
-    <footer>Made with 💨 by Shane Warren – <strong>v1.9.7</strong></footer>
+    <footer>Made by Shane Warren – <strong>v1.10.3</strong></footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
