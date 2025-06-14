@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cloud 9 Vapes Inventory Manager – v1.6.0</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0099ff" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+</head>
+<body>
+
+  <h1>Cloud 9 Vapes Inventory Manager</h1>
+
+  <!-- Controls -->
+  <input type="file" id="csvFile" accept=".csv" />
+  <label for="multiplierInput">Reorder Multiplier:</label>
+  <input type="number" id="multiplierInput" min="0.5" step="0.1" value="1.0" onchange="processCSV()" />
+  <label for="bufferInput">Safety Buffer (%):</label>
+  <input type="number" id="bufferInput" min="0" max="100" step="5" value="20" onchange="processCSV()" />
+  <button onclick="processCSV()">Analyze</button>
+  <button onclick="downloadCSV()" id="downloadBtn" style="display:none;">Download Reorder List</button>
+
+  <!-- Search & Category Filter -->
+  <input type="text" id="searchInput" placeholder="🔍 Search by name or category..." onkeyup="filterResults()" />
+  <select id="categoryFilter" onchange="filterResults()">
+    <option value="">🔽 Filter by Category</option>
+  </select>
+
+  <!-- Results -->
+  <div id="results"></div>
+
+  <!-- Footer & Theme Toggle -->
+  <footer>
+    <div>
+      <button onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
+    </div>
+    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.6.0</strong></p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('Service Worker registered ✔️'))
+        .catch(err => console.log('Service Worker failed ❌', err));
+    }
+  </script>
+</body>
+</html>
