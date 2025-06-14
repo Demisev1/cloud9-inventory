@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud 9 Vapes Inventory Manager – v1.7.1</title>
+  <title>Cloud 9 Vapes Inventory Manager – v1.8.0</title>
   <link rel="stylesheet" href="style.css">
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0099ff" />
@@ -12,6 +12,9 @@
 <body>
 
   <h1>Cloud 9 Vapes Inventory Manager</h1>
+
+  <!-- Drag & Drop Zone -->
+  <div id="dropZone">📤 Drop your CSV file here</div>
 
   <!-- Controls -->
   <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" />
@@ -42,17 +45,15 @@
     <div>
       <button onclick="toggleTheme()">🌓 Toggle Dark Mode</button>
     </div>
-    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.7.1</strong></p>
+    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.8.0</strong></p>
   </footer>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <script src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./service-worker.js')
-        .then(reg => console.log('Service Worker registered ✔️'))
-        .catch(err => console.log('Service Worker failed ❌', err));
+        .catch(() => console.log('Service Worker failed ❌'));
     }
   </script>
 </body>

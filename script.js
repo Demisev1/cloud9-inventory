@@ -71,7 +71,7 @@ function processCSV() {
 function processCSVFromText(csvText) {
   const mult = parseFloat(document.getElementById("multiplierInput").value) || 1.0;
   const buf = parseFloat(document.getElementById("bufferInput").value) || 0;
-  
+
   Papa.parse(csvText, {
     header: true,
     skipEmptyLines: true,
@@ -84,20 +84,23 @@ function processCSVFromText(csvText) {
         const buffer = Math.ceil(sold * mult * (buf / 100));
         const raw = sold * mult + buffer - stock;
         const qty = raw > 0 ? Math.ceil(raw) : 0;
-        const i = {
+        const item = {
           item_name: r['Product name'],
           category: r['Category'] || 'Uncategorized',
           items_sold: sold,
           items_in_stock: stock,
           restock_quantity: qty
         };
-        if (qty) reorderList.push(i);
-        if (stock < 0) negativeStockList.push(i);
+        if (qty) reorderList.push(item);
+        if (stock < 0) negativeStockList.push(item);
       });
-      reorderList.sort((a,b) => a.category.localeCompare(b.category) || b.restock_quantity - a.restock_quantity);
+      reorderList.sort((a,b) =>
+        a.category.localeCompare(b.category) || b.restock_quantity - a.restock_quantity
+      );
       populateCategoryFilter(reorderList);
       displayResults(reorderList, negativeStockList);
-      document.getElementById('downloadBtn').style.display = reorderList.length ? 'inline-block' : 'none';
+      document.getElementById('downloadBtn').style.display =
+        reorderList.length ? 'inline-block' : 'none';
     }
   });
 }
@@ -134,10 +137,10 @@ function populateCategoryFilter(data) {
   const sel = document.getElementById('categoryFilter');
   sel.innerHTML = `<option value="">🔽 Filter by Category</option>`;
   new Set(data.map(i => i.category)).forEach(cat => {
-    const o = document.createElement('option');
-    o.value = cat;
-    o.textContent = cat;
-    sel.appendChild(o);
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    sel.appendChild(opt);
   });
 }
 
@@ -152,6 +155,34 @@ function filterResults() {
     });
   });
 }
+
+// Drag & Drop Setup
+const dropZone = document.getElementById('dropZone');
+['dragenter','dragover'].forEach(evt =>
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  })
+);
+['dragleave','drop'].forEach(evt =>
+  dropZone.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+  })
+);
+dropZone.addEventListener('drop', e => {
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.csv')) {
+    const reader = new FileReader();
+    reader.onload = evt => {
+      addToHistory(file.name, evt.target.result);
+      processCSVFromText(evt.target.result);
+    };
+    reader.readAsText(file);
+  } else {
+    alert("Only CSV files are supported!");
+  }
+});
 
 function init() {
   if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');

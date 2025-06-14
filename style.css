@@ -29,6 +29,24 @@ h1, h2 {
   margin-bottom: 1rem;
 }
 
+/* Drag & Drop Zone */
+#dropZone {
+  margin: 20px 0;
+  padding: 30px;
+  border: 2px dashed var(--main-color);
+  text-align: center;
+  color: var(--main-color);
+  font-weight: bold;
+  border-radius: var(--border-radius);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+#dropZone.dragover {
+  background: #e0f7ff;
+  border-color: #0078cc;
+}
+
+/* Inputs */
 input, select, button {
   display: block;
   width: 100%;
@@ -39,7 +57,6 @@ input, select, button {
   border: 1px solid #ccc;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  box-sizing: border-box;
   background: #fff;
   color: #000;
   transition: background 0.3s, color 0.3s;
@@ -64,14 +81,13 @@ button:hover {
   background: #0078cc;
 }
 
-/* History section */
+/* History */
 #historySection {
   margin-top: 30px;
   padding: 10px;
   background: var(--light-bg);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  transition: background 0.3s;
 }
 
 body.dark-mode #historySection {
@@ -79,9 +95,8 @@ body.dark-mode #historySection {
 }
 
 #uploadHistory {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
-  margin: 0;
 }
 
 #uploadHistory li {
@@ -114,7 +129,7 @@ body.dark-mode #uploadHistory li {
   background: #c62828;
 }
 
-/* Results table */
+/* Results Table */
 #results {
   margin-top: 30px;
 }
@@ -160,6 +175,7 @@ td[style*="color: red"] {
   font-weight: bold;
 }
 
+/* Footer */
 footer {
   margin-top: 50px;
   padding: 20px;
@@ -172,6 +188,7 @@ body.dark-mode footer {
   color: #bbb;
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   body {
     padding: 10px;
