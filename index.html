@@ -3,53 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud 9 Vapes Inventory Manager – v1.9.0</title>
+  <title>Cloud 9 Vapes Inventory Manager – v1.9.2</title>
   <link rel="stylesheet" href="style.css">
   <meta name="theme-color" content="#0099ff" />
 </head>
 <body>
+  <div class="container">
+    <h1>Cloud 9 Vapes Inventory Manager</h1>
 
-  <h1>Cloud 9 Vapes Inventory Manager</h1>
+    <!-- Theme Selector + Toggle -->
+    <div class="card controls">
+      <div>
+        <label>🎨 Theme</label>
+        <select id="themeSelect" onchange="changeTheme()">
+          <option value="default">Light</option>
+          <option value="cloud9">Cloud 9</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <button onclick="toggleTheme()">🌓 Toggle</button>
+    </div>
 
-  <!-- Theme Selector -->
-  <label for="themeSelect">🎨 Theme:</label>
-  <select id="themeSelect" onchange="changeTheme()">
-    <option value="default">Light (Default)</option>
-    <option value="cloud9">Cloud 9</option>
-    <option value="dark">Dark Mode</option>
-  </select>
+    <!-- CSV Upload -->
+    <div class="card">
+      <div id="dropZone">📤 Drop your CSV here or click to upload</div>
+      <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" hidden />
+    </div>
 
-  <!-- Drag & Drop Zone -->
-  <div id="dropZone">📤 Drop your CSV file here</div>
+    <!-- Reorder Settings -->
+    <div class="card controls">
+      <div>
+        <label>Reorder Multiplier</label>
+        <input type="number" id="multiplierInput" min="0.5" step="0.1" onchange="saveSettings()" />
+      </div>
+      <div>
+        <label>Safety Buffer (%)</label>
+        <input type="number" id="bufferInput" min="0" max="100" onchange="saveSettings()" />
+      </div>
+      <button onclick="processCSV()">Analyze 🔍</button>
+    </div>
 
-  <!-- Controls -->
-  <input type="file" id="csvFile" accept=".csv" onchange="handleFileUpload()" />
-  <label for="multiplierInput">Reorder Multiplier:</label>
-  <input type="number" id="multiplierInput" min="0.5" step="0.1" onchange="saveSettings()" />
-  <label for="bufferInput">Safety Buffer (%):</label>
-  <input type="number" id="bufferInput" min="0" max="100" onchange="saveSettings()" />
-  <button onclick="processCSV()">Analyze</button>
-  <button onclick="downloadCSV()" id="downloadBtn" style="display:none;">Download Reorder List</button>
+    <!-- Filters & History -->
+    <div class="card">
+      <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterResults()" />
+      <select id="categoryFilter" onchange="filterResults()">
+        <option value="">Filter by Category</option>
+      </select>
+      <ul id="uploadHistory"></ul>
+    </div>
 
-  <!-- Upload History -->
-  <section id="historySection">
-    <h2>📁 Upload History</h2>
-    <ul id="uploadHistory"></ul>
-  </section>
+    <!-- Results -->
+    <div id="results" class="card"></div>
 
-  <!-- Search & Category Filter -->
-  <input type="text" id="searchInput" placeholder="🔍 Search by name or category..." onkeyup="filterResults()" />
-  <select id="categoryFilter" onchange="filterResults()">
-    <option value="">🔽 Filter by Category</option>
-  </select>
-
-  <!-- Results -->
-  <div id="results"></div>
-
-  <!-- Footer -->
-  <footer>
-    <p>Made with 💨 by <strong>Shane Warren</strong> for <strong>Cloud 9 Vapes</strong> – <strong>v1.9.0</strong></p>
-  </footer>
+    <footer>Made with 💨 by Shane Warren – <strong>v1.9.2</strong></footer>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
   <script src="script.js"></script>
