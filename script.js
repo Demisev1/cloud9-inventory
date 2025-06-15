@@ -1,4 +1,3 @@
-// Full script.js v1.10.3
 (() => {
   let historyList = [], restockList = [], negList = [];
   let sortConfig = { table: 'restock', key: 'Category', asc: true };
@@ -7,6 +6,8 @@
   const dropZone = $('dropZone');
   const fileInput = $('csvFile');
   const analyzeButton = $('analyzeButton');
+  const downloadCsvBtn = $('downloadCsvBtn');
+  const printViewBtn = $('printViewBtn');
   const themeToggle = $('themeToggle');
 
   function init() {
@@ -16,14 +17,12 @@
     loadHistory();
   }
 
-  function toggleTheme() {
-    document.body.classList.toggle('theme-dark');
-    localStorage.theme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
-  }
-
   function initTheme() {
     if (localStorage.theme === 'dark') document.body.classList.add('theme-dark');
-    themeToggle.addEventListener('click', toggleTheme);
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('theme-dark');
+      localStorage.theme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
+    });
   }
 
   function setupHandlers() {
@@ -50,11 +49,14 @@
     });
 
     dropZone.addEventListener('click', () => fileInput.click());
-    
+
     analyzeButton.addEventListener('click', () => {
       if (fileInput.files.length) readCSV(fileInput.files[0]);
       else alert('Drop or select a CSV file first!');
     });
+
+    downloadCsvBtn.addEventListener('click', downloadReorderCsv);
+    printViewBtn.addEventListener('click', () => window.print());
 
     $('periodSelect').addEventListener('change', saveSettings);
     $('multiplierInput').addEventListener('change', saveSettings);
@@ -89,22 +91,18 @@
           const sold = +r[soldKey] || 0;
           const stock = +r.Qty || 0;
           const qty = Math.max(0, Math.ceil(sold * m + Math.ceil(sold * m * (b / 100)) - stock));
-          if (qty) {
-            restockList.push({
-              Category: r.Category,
-              Item: r['Product name'],
-              Sold: sold,
-              Stock: stock,
-              Qty: qty
-            });
-          }
-          if (stock < 0) {
-            negList.push({
-              Category: r.Category,
-              Item: r['Product name'],
-              Stock: stock
-            });
-          }
+          if (qty) restockList.push({
+            Category: r.Category,
+            Item: r['Product name'],
+            Sold: sold,
+            Stock: stock,
+            Qty: qty
+          });
+          if (stock < 0) negList.push({
+            Category: r.Category,
+            Item: r['Product name'],
+            Stock: stock
+          });
         });
         populateCategory();
         renderTables();
@@ -148,8 +146,7 @@
         <button onclick="remove(${i})">Delete</button>`;
       ul.appendChild(li);
     });
-
-    window.replay = idx => readCSV({ name: historyList[idx].name, text: historyList[idx].content }, historyList[idx].name);
+    window.replay = idx => processCSV(historyList[idx].content, historyList[idx].name);
     window.remove = idx => {
       historyList.splice(idx, 1);
       localStorage.uploadHistory = JSON.stringify(historyList);
@@ -159,8 +156,8 @@
 
   function populateCategory() {
     const sel = $('categoryFilter');
-    const unique = Array.from(new Set(restockList.map(r => r.Category)));
     sel.innerHTML = '<option value="">Filter by Category</option>';
+    const unique = [...new Set(restockList.map(r => r.Category))];
     unique.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c;
@@ -191,8 +188,8 @@
         html += `<th onclick="psort('neg','${c}')">${c}</th>`;
       });
       html += '</tr>';
-      negList.forEach(r => {
-        html += `<tr><td>${r.Category}</td><td>${r.Item}</td><td style="color:red;">${r.Stock}</td></tr>`;
+      negList.forEach(n => {
+        html += `<tr><td>${n.Category}</td><td>${n.Item}</td><td style="color:red;">${n.Stock}</td></tr>`;
       });
       html += '</table>';
     }
@@ -205,7 +202,7 @@
     const arr = table === 'restock' ? restockList : negList;
     sortConfig.asc = sortConfig.table === table && sortConfig.key === key ? !sortConfig.asc : true;
     sortConfig = { table, key, asc: sortConfig.asc };
-    arr.sort((a, b) => {
+    arr.sort((a,b) => {
       const vA = a[key], vB = b[key];
       if (typeof vA === 'number') return sortConfig.asc ? vA - vB : vB - vA;
       return sortConfig.asc ? vA.localeCompare(vB) : vB.localeCompare(vA);
@@ -226,12 +223,24 @@
   window.filterResults = () => {
     const q = $('searchInput').value.toLowerCase();
     const c = $('categoryFilter').value.toLowerCase();
-    document.querySelectorAll('#results table tr').forEach((tr, i) => {
+    document.querySelectorAll('#results table tr').forEach((tr,i) => {
       if (i === 0) return;
-      const txt = tr.textContent.toLowerCase();
-      tr.style.display = (txt.includes(q) && (c === '' || txt.includes(c))) ? '' : 'none';
+      tr.style.display = (tr.textContent.toLowerCase().
+        includes(q) && (c === '' || tr.textContent.toLowerCase().includes(c))) ? '' : 'none';
     });
   };
+
+  function downloadReorderCsv() {
+    if (!restockList.length) return alert('No restock data to download!');
+    const csv = Papa.unparse(restockList);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `reorder_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 
   init();
 })();

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloud 9 Vapes Inventory Manager – v1.10.3</title>
+  <title>Cloud 9 Vapes Inventory Manager – v1.11.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Cloud 9 Vapes Inventory Manager</h1>
+    <h1>Cloud 9 Vapes Inventory Manager</h1>
 
     <div class="card controls">
       <button id="themeToggle">🌓 Switch Theme</button>
@@ -44,10 +44,15 @@
       <button id="analyzeButton">Analyze 🔍</button>
     </div>
 
+    <div class="card controls export-controls">
+      <button id="downloadCsvBtn">⬇️ Download Reorder CSV</button>
+      <button id="printViewBtn">🖨️ Print / Save as PDF</button>
+    </div>
+
     <ul id="uploadHistory" class="card"></ul>
     <div id="results" class="card"></div>
 
-    <footer>Made by Shane Warren – <strong>v1.10.3</strong></footer>
+    <footer>Made by Shane Warren – <strong>v1.11.0</strong></footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>

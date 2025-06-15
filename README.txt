@@ -1,35 +1,29 @@
-# Cloud 9 Vapes Inventory Manager – v1.9.8
+# Cloud 9 Vapes Inventory Manager – v1.11.0
 
 **Created by Shane Warren**
 
 ## 🔍 Purpose
 
-A fast, offline-first inventory analysis tool for Cloud 9 Vapes. Upload your stock CSV and instantly get restock needs based on recent sales.
+An offline-first inventory restock analysis tool. Upload your CSV file and instantly calculate reorder amounts using recent sales data with customizable buffer and multipliers.
 
 ---
 
 ## 🚀 Features
 
-- 📤 Drag & Drop CSV Upload (or select manually)
-- 🧠 Calculates restock quantity based on sales + buffer
-- 📊 Table view of:
-  - Restock items
-  - Out of stock
-  - Negative stock
-- 🔍 Search and Category Filtering
-- 📐 Sortable columns (asc/desc)
-- 💾 Multiplier & buffer saved in localStorage
-- 🌓 Light & Dark mode
-- 📱 Fully mobile responsive
-
----
-
-## 🛠 How to Use
-
-1. Open `index.html` in your browser.
-2. Drop or upload a CSV file with inventory data.
-3. Set your Reorder Multiplier and Buffer %.
-4. Click “Analyze 🔍” to generate reorder recommendations.
+- 📤 Drag & Drop CSV Upload (or manual file select)
+- 🧠 Smart Restock Calculation based on 7/30/60/90 day sales
+- 🔧 Adjustable Multiplier & Safety Buffer (saved locally)
+- 📊 Interactive Tables:
+  - Restock List
+  - Negative Stock Warnings
+- 🔍 Live Search and Category Filtering
+- 📐 Clickable Column Sorting
+- 📦 **Export Options**:
+  - ⬇️ Download Reorder List (CSV)
+  - 🖨️ Print or Save as PDF
+- 🌓 Light & Dark Theme Toggle (saved across sessions)
+- 📱 Fully Mobile-Responsive UI
+- 🕓 Upload History with Re-run & Delete buttons
 
 ---
 
@@ -38,18 +32,13 @@ A fast, offline-first inventory analysis tool for Cloud 9 Vapes. Upload your sto
 
 ---
 
-## 🧾 CSV Format
+## 📄 Required CSV Format
 
-CSV file should contain at least:
+Your file must include these headers:
 
-- `Product name`
-- `Category`
-- `Qty`
-- `Last Sales/7 Days`
 
-### Example:
+### ✅ Example:
 
 ```csv
-ID,Product name,Category,Qty,Low stock qty,Purchased Qty,Last Sales/7 Days
-2567,Gold Spectrum 3.5g Flower Sundae Runtz,Flower,0,2,0,3
-
+ID,Product name,Category,Qty,Low stock qty,Purchased Qty,Last Sales/7 Days,Last Sales/30 Days,Last Sales/60 Days,Last Sales/90 Days
+2567,Gold Spectrum 3.5g Flower Sundae Runtz,Flower,0,2,0,3,6,9,12
